@@ -6,26 +6,18 @@
     font-family: Arial, sans-serif;
 }
 
+/* Body Styles */
 body {
     background-color: #f9f9f9;
     color: #333;
     line-height: 1.6;
-    display: flex; /* Enable flexbox */
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     height: 100vh; /* Full viewport height */
 }
 
-header {
-    text-align: center;
-    margin-bottom: 1rem;
-}
-
-header h1 {
-    font-size: 2rem;
-    color: #1e90ff;
-}
-
+/* Main Container */
 main {
     background-color: #fff;
     padding: 2rem;
@@ -35,22 +27,32 @@ main {
     max-width: 400px;
 }
 
+/* Form Styling */
 form {
     display: flex;
     flex-direction: column;
 }
 
+/* Form Heading */
+form h1 {
+    text-align: center;
+    color: #1e90ff;
+    margin-bottom: 1.5rem;
+}
+
+/* Form Group Styling */
 .form-group {
     margin-bottom: 1rem;
 }
 
+/* Label Styling */
 label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: bold;
-    color: #333;
 }
 
+/* Input Styling */
 input {
     width: 100%;
     padding: 0.5rem;
@@ -59,12 +61,21 @@ input {
     font-size: 1rem;
 }
 
+/* Input Focus Effect */
 input:focus {
     border-color: #1e90ff;
     outline: none;
     box-shadow: 0 0 5px rgba(30, 144, 255, 0.5);
 }
 
+/* Error Message Container */
+#errorContainer {
+    color: red;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+/* Button Styling */
 button {
     background-color: #1e90ff;
     color: #fff;
@@ -76,18 +87,7 @@ button {
     transition: background-color 0.3s;
 }
 
+/* Button Hover Effect */
 button:hover {
     background-color: #104e8b;
-}
-
-.error-messages {
-    color: red;
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-}
-
-#errorContainer p.error {
-    color: red;
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
 }

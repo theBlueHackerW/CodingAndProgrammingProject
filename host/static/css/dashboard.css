@@ -1,0 +1,211 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #f9f9f9;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Navigation Bar */
+header {
+    background-color: #1e90ff;
+    color: #fff;
+    padding: 1rem;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.navbar .logo {
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.nav-links a,
+.nav-links button {
+    text-decoration: none;
+    color: #fff;
+    background-color: transparent;
+    border: none;
+    margin-left: 1rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    border-radius: 5px;
+}
+
+.nav-links a:hover,
+.nav-links button:hover {
+    background-color: #dcdcdc;
+    color: #1e90ff;
+}
+
+/* Summary Section */
+.summary-section {
+    padding: 2rem;
+    background-color: #fff;
+    margin: 2rem auto;
+    border-radius: 10px;
+    max-width: 1200px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.summary-section h1 {
+    font-size: 2rem;
+    color: #1e90ff;
+    margin-bottom: 1rem;
+}
+
+.summary-cards {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-around;
+}
+
+.card {
+    flex: 1;
+    padding: 1.5rem;
+    background-color: #f4f4f4;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.card p {
+    font-size: 1.5rem;
+    color: #333;
+}
+
+/* Transactions Section */
+.transactions-section {
+    padding: 2rem;
+    background-color: #fff;
+    margin: 2rem auto;
+    border-radius: 10px;
+    max-width: 1200px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.transactions-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #1e90ff;
+}
+
+.transaction-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.transaction-controls input {
+    flex: 1;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-right: 1rem;
+}
+
+.transaction-controls button {
+    background-color: #1e90ff;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.transaction-controls button:hover {
+    background-color: #104e8b;
+}
+
+.transactions-section table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    margin-top: 1rem;
+}
+
+.transactions-section th, .transactions-section td {
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+}
+
+.transactions-section th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.transactions-section td {
+    background-color: #fff;
+}
+
+.transactions-section button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+}
+
+/* Reports Section */
+.reports-section {
+    padding: 2rem;
+    background-color: #fff;
+    margin: 2rem auto;
+    border-radius: 10px;
+    max-width: 1200px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.reports-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #1e90ff;
+}
+
+.report-graphs {
+    display: flex;
+    gap: 2rem;
+    justify-content: space-around;
+    margin-top: 1rem;
+}
+
+.graph {
+    flex: 1;
+    height: 200px;
+    background-color: #f4f4f4;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #1e90ff;
+    color: #fff;
+    margin-top: 2rem;
+    font-size: 0.9rem;
+}

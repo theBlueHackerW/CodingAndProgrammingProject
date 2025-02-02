@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceEase Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <header>
+        <div class="navbar">
+            <div class="logo">FinanceEase</div>
+            <nav class="nav-links">
+                <a href="#summary">Summary</a>
+                <a href="#transactions">Transactions</a>
+                <a href="#reports">Reports</a>
+                <form action="{{ url_for('logout') }}" method="get" style="display:inline;">
+                    <button type="submit">Log Out</button>
+                </form>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Summary Section -->
+        <section id="summary" class="summary-section">
+            <h1>Welcome Back, {{ user.first_name }}!</h1>
+            <div class="summary-cards">
+                <div class="card">
+                    <h2>Account Balance</h2>
+                    <form action="{{ url_for('update_balance') }}" method="POST">
+                        <input type="text" name="balance" value="{{ user.balance }}">
+                        <button type="submit">Update</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h2>Total Income</h2>
+                    <p>
+                        ${{ "%.2f"|format(transactions | selectattr("transaction_type", "equalto", "income") | map(attribute="amount") | sum) }}
+                    </p>
+                </div>
+                <div class="card">
+                    <h2>Total Expenses</h2>
+                    <p>
+                        ${{ "%.2f"|format((transactions | selectattr("transaction_type", "equalto", "expense") | map(attribute="amount") | sum)|abs) }}
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transactions Section -->
+        <section id="transactions" class="transactions-section">
+            <h2>Your Transactions</h2>
+            <div class="transaction-controls">
+                <form method="GET" action="{{ url_for('dashboard') }}" style="flex:1;">
+                    <input type="text" name="q" placeholder="Search transactions..." value="{{ search_query|default('') }}">
+                    <button type="submit">Search</button>
+                </form>
+                <button onclick="openAddTransactionModal()">Add Transaction</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Recurrence (days)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in transactions %}
+                    <tr>
+                        <td>{{ tx.transaction_date.strftime('%m/%d/%Y') }}</td>
+                        <td>{{ tx.category }}</td>
+                        <td>${{ "%.2f"|format(tx.amount) }}</td>
+                        <td>{{ tx.transaction_type }}</td>
+                        <td>{{ tx.description }}</td>
+                        <td>{{ tx.recurrence }}</td>
+                        <td>
+                            <button onclick="openEditTransactionModal({{ tx.id }}, '{{ tx.category }}', {{ tx.amount }}, '{{ tx.transaction_type }}', '{{ tx.description }}', {{ tx.recurrence }})">Edit</button>
+                            <form action="{{ url_for('delete_transaction', tx_id=tx.id) }}" method="POST" style="display:inline;">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Reports Section -->
+        <section id="reports" class="reports-section">
+            <h2>Reports</h2>
+            <p>Analyze your spending patterns:</p>
+            <div class="report-graphs">
+                <div class="graph">Bar Graph (Income vs. Expenses)</div>
+                <div class="graph">Pie Chart (Spending Categories)</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Transaction Modal (for adding/editing) -->
+    <div id="transactionModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:#fff; padding:20px; border:1px solid #ddd; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+        <h2 id="modalTitle">Add Transaction</h2>
+        <form id="transactionForm" method="POST" action="{{ url_for('add_transaction') }}">
+            <input type="hidden" name="tx_id" id="tx_id" value="">
+            <div class="form-group">
+                <label for="amount">Amount:</label>
+                <input type="text" name="amount" id="amount" required>
+            </div>
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <input type="text" name="category" id="category" required>
+            </div>
+            <div class="form-group">
+                <label for="transaction_type">Type:</label>
+                <select name="transaction_type" id="transaction_type" required>
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="recurrence">Recurrence (days, 0 for one-time):</label>
+                <input type="number" name="recurrence" id="recurrence" value="0" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea name="description" id="description"></textarea>
+            </div>
+            <button type="submit" id="modalSubmitButton">Save</button>
+            <button type="button" onclick="closeTransactionModal()">Cancel</button>
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
