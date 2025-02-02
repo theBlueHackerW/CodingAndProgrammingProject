@@ -182,22 +182,20 @@ header {
     color: #1e90ff;
 }
 
+/* Adjusted for Smaller Graphs */
 .report-graphs {
     display: flex;
-    gap: 2rem;
-    justify-content: space-around;
+    gap: 1rem; /* Reduced gap between graphs */
+    justify-content: space-between; /* Adjusted to make sure graphs are aligned properly */
     margin-top: 1rem;
+    flex-wrap: wrap; /* Allows graphs to adjust in smaller screen sizes */
 }
 
-.graph {
-    flex: 1;
-    height: 200px;
-    background-color: #f4f4f4;
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.report-graphs canvas {
+    width: 250px !important;  /* Smaller size for the graphs */
+    height: 150px !important; /* Smaller height for the graphs */
+    border-radius: 10px; /* Optional: adds rounded corners to the graphs */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: adds slight shadow for aesthetic purposes */
 }
 
 /* Footer */
@@ -209,3 +207,4 @@ footer {
     margin-top: 2rem;
     font-size: 0.9rem;
 }
+
