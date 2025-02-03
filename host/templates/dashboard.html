@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinanceEase Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0"></script>
+
 </head>
+
 <body>
     <!-- Navigation Bar -->
     <header>
@@ -98,6 +101,7 @@
         <!-- Reports Section -->
         <section id="reports" class="reports-section">
             <h2>Reports</h2>
+<<<<<<< HEAD
             <p>Customize your report by selecting the graph type and period:</p>
             <form id="reportForm" method="POST" action="{{ url_for('dashboard') }}">
                 <label for="graph_type">Graph Type:</label>
@@ -122,6 +126,12 @@
             {% if report_graph %}
             <div class="report-summary">
                 <p>{{ report_summary }}</p>
+=======
+            <p>Analyze your spending patterns:</p>
+            <div class="report-graphs">
+                <canvas id="incomeExpenseChart"></canvas>
+                <canvas id="categoryChart"></canvas>
+>>>>>>> 159d842ee396e2ccaa4060508f034f127ed401a8
             </div>
             <div class="report-graph">
                 {{ report_graph | safe }}
@@ -182,6 +192,173 @@
         {% endwith %}
     </div>
 
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Dashboard Script -->
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+    <!-- Script for Fetching and Rendering Charts -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch("{{ url_for('graph_data') }}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error(data.error);
+                        return;
+                    }
+
+                    // Bar Chart for Income vs. Expenses
+                    const ctx1 = document.getElementById('incomeExpenseChart').getContext('2d');
+                    new Chart(ctx1, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Income', 'Expenses'],
+                            datasets: [{
+                                label: 'Amount ($)',
+                                data: [data.income_vs_expense.income, data.income_vs_expense.expenses],
+                                backgroundColor: ['#4CAF50', '#FF5733']
+                            }]
+                        }
+                    });
+
+                    // Pie Chart for Category-wise Expenses
+                    const ctx2 = document.getElementById('categoryChart').getContext('2d');
+                    new Chart(ctx2, {
+                        type: 'pie',
+                        data: {
+                            labels: Object.keys(data.category_distribution),
+                            datasets: [{
+                                label: 'Spending by Category',
+                                data: Object.values(data.category_distribution),
+                                backgroundColor: ['#FF5733', '#FFC300', '#36A2EB', '#4CAF50', '#9966FF']
+                            }]
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching graph data:', error));
+        });
+        
+     
+  function fetchGraphData() {
+    fetch('/graph_data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        console.log('Error:', data.error);
+        return;
+      }
+
+      // Update your graph here with the data returned from the server
+      updateGraph(data);
+    })
+    .catch((error) => {
+      console.error('Error fetching graph data:', error);
+    });
+  }
+
+  // Call this function on page load
+  window.onload = function() {
+    fetchGraphData();
+    // Set an interval to refresh every 5 seconds (5000 ms)
+    setInterval(fetchGraphData, 5000);
+  };
+
+  function updateGraph(data) {
+    // Logic to update your graph with the new data goes here.
+    // For example, if you're using Chart.js:
+    myChart.data.datasets[0].data = [data.income_vs_expense.income, data.income_vs_expense.expenses];
+    myChart.update();
+  }
+  
+    document.addEventListener("DOMContentLoaded", function() {
+        // Fetch graph data from the server
+        fetch("{{ url_for('graph_data') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            // Include any necessary body data here, e.g., user-specific details
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error(data.error);
+                return;
+            }
+
+            // Prepare data for the Income vs Expense bar chart
+            const incomeExpenseData = {
+                labels: ['Income', 'Expenses'],
+                datasets: [{
+                    label: 'Amount ($)',
+                    data: [data.income_vs_expense.income, data.income_vs_expense.expenses],
+                    backgroundColor: ['#4CAF50', '#FF5733'],
+                }]
+            };
+
+            // Prepare data for the Category distribution pie chart
+            const categoryData = {
+                labels: Object.keys(data.category_distribution),
+                datasets: [{
+                    label: 'Spending by Category',
+                    data: Object.values(data.category_distribution),
+                    backgroundColor: ['#FF5733', '#FFC300', '#36A2EB', '#4CAF50', '#9966FF'],
+                }]
+            };
+
+            // Render the Income vs Expense bar chart
+            const ctx1 = document.getElementById('incomeExpenseChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'bar',
+                data: incomeExpenseData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                        },
+                    },
+                }
+            });
+
+            // Render the Category distribution pie chart
+            const ctx2 = document.getElementById('categoryChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'pie',
+                data: categoryData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                    },
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching graph data:', error);
+        });
+    });
+    
+
+
+    </script>
+
+<canvas id="incomeExpenseChart" width="60" height="40"></canvas>
+<canvas id="categoryChart" width="60" height="40"></canvas>
 </body>
 </html>
