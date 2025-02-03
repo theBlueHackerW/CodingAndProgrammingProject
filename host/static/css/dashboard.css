@@ -207,7 +207,6 @@ footer {
     margin-top: 2rem;
     font-size: 0.9rem;
 }
-<<<<<<< HEAD
 /* Style for the account balance input to match total income/expense amounts */
 .balance-input {
     font-size: 1.5rem;        /* Match the font size of the amounts */
@@ -234,6 +233,3 @@ footer {
 .update-button:hover {
     background-color: #104e8b;
 }
-=======
-
->>>>>>> 159d842ee396e2ccaa4060508f034f127ed401a8
