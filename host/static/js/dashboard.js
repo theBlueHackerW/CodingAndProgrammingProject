@@ -25,4 +25,3 @@ function openEditTransactionModal(id, category, amount, type, description, recur
 function closeTransactionModal() {
     document.getElementById('transactionModal').style.display = "none";
 }
-

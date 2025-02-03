@@ -1,8 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-import pandas as pd
-import plotly.express as px
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Replace with your actual secret key
@@ -37,7 +35,7 @@ class User(db.Model):
 class Transaction(db.Model):
     __bind_key__ = 'transactions'
     id = db.Column(db.Integer, primary_key=True)
-    # Instead of a foreign key, we store the username as a string.
+    # Instead of a foreign key to User, we store the username as a string.
     username = db.Column(db.String(80), nullable=False)
     transaction_date = db.Column(db.DateTime, default=datetime.utcnow)
     amount = db.Column(db.Float, nullable=False)
@@ -114,174 +112,22 @@ def logout():
     flash("Logged out successfully.", "success")
     return redirect(url_for('home'))
 
-# The dashboard route now handles both GET and POST (for report generation)
-@app.route('/dashboard', methods=['GET', 'POST'])
+@app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
         flash("Please log in first.", "error")
         return redirect(url_for('login'))
     user = User.query.get(session['user_id'])
     query = request.args.get('q', '')
+    # Query transactions by username (stored in transactions.db)
     transactions_query = Transaction.query.filter_by(username=user.username)
     if query:
         transactions_query = transactions_query.filter(
-            (Transaction.category.ilike(f"%{query}%")) |
+            (Transaction.category.ilike(f"%{query}%")) | 
             (Transaction.description.ilike(f"%{query}%"))
         )
     transactions = transactions_query.all()
-
-    # Initialize report variables
-    report_graph = None
-    report_summary = ""
-    report_stats = ""
-    selected_graph = None
-    selected_period = None
-
-    # If the report form was submitted via POST, generate the graph and statistics
-    if request.method == 'POST':
-        graph_type = request.form.get('graph_type')
-        period = request.form.get('period')
-        selected_graph = graph_type
-        selected_period = period
-
-        end_date = datetime.utcnow()
-        if period == "week":
-            start_date = end_date - pd.Timedelta(days=7)
-        elif period == "month":
-            start_date = end_date - pd.Timedelta(days=30)
-        elif period == "year":
-            start_date = end_date - pd.Timedelta(days=365)
-        else:  # "all" or unspecified
-            start_date = None
-
-        report_query = Transaction.query.filter_by(username=user.username)
-        if start_date:
-            report_query = report_query.filter(
-                Transaction.transaction_date >= start_date,
-                Transaction.transaction_date <= end_date
-            )
-        report_transactions = report_query.all()
-
-        if report_transactions:
-            data = {
-                "date": [tx.transaction_date for tx in report_transactions],
-                "amount": [tx.amount for tx in report_transactions],
-                "transaction_type": [tx.transaction_type for tx in report_transactions],
-                "category": [tx.category for tx in report_transactions]
-            }
-            df = pd.DataFrame(data)
-        else:
-            df = pd.DataFrame(columns=["date", "amount", "transaction_type", "category"])
-
-        # Generate graph and statistics based on the selected graph type
-        if graph_type == "balance_time":
-            df_sorted = df.sort_values("date")
-            if not df_sorted.empty:
-                computed_balance = df_sorted["amount"].cumsum()
-                offset = user.balance - computed_balance.iloc[-1]
-                df_sorted["actual_balance"] = computed_balance + offset
-                fig = px.line(df_sorted, x="date", y="actual_balance", title="Account Balance Over Time")
-                initial = df_sorted["actual_balance"].iloc[0]
-                final = df_sorted["actual_balance"].iloc[-1]
-                report_summary = f"Your account balance changed from ${initial:.2f} to ${final:.2f} over the selected period."
-                avg_daily_change = df_sorted["actual_balance"].diff().mean()
-                max_balance = df_sorted["actual_balance"].max()
-                min_balance = df_sorted["actual_balance"].min()
-                stats_list = [
-                    f"Average daily change: ${avg_daily_change:.2f}",
-                    f"Highest balance: ${max_balance:.2f}",
-                    f"Lowest balance: ${min_balance:.2f}"
-                ]
-                report_stats = "<br>".join(stats_list)
-            else:
-                fig = px.line(title="Account Balance Over Time")
-                report_summary = "No transactions available for the selected period."
-                report_stats = "No statistics available."
-        elif graph_type == "income_expenses_time":
-            df_income = df[df["transaction_type"] == "income"].sort_values("date")
-            df_expense = df[df["transaction_type"] == "expense"].sort_values("date")
-            fig = px.line(title="Income and Expenses Over Time")
-            if not df_income.empty:
-                fig.add_scatter(x=df_income["date"], y=df_income["amount"], mode="lines+markers", name="Income")
-            if not df_expense.empty:
-                fig.add_scatter(x=df_expense["date"], y=df_expense["amount"], mode="lines+markers", name="Expenses")
-            report_summary = "This graph shows your income and expenses over the selected period."
-            avg_income = df_income["amount"].mean() if not df_income.empty else 0
-            avg_expense = df_expense["amount"].mean() if not df_expense.empty else 0
-            total_income = df_income["amount"].sum() if not df_income.empty else 0
-            total_expense = abs(df_expense["amount"].sum()) if not df_expense.empty else 0
-            stats_list = [
-                f"Average income: ${avg_income:.2f}",
-                f"Total income: ${total_income:.2f}",
-                f"Average expense: ${avg_expense:.2f}",
-                f"Total expenses: ${total_expense:.2f}"
-            ]
-            report_stats = "<br>".join(stats_list)
-        elif graph_type == "bar_category_income":
-            df_income = df[df["transaction_type"] == "income"]
-            df_grouped = df_income.groupby("category")["amount"].sum().reset_index()
-            fig = px.bar(df_grouped, x="category", y="amount", title="Total Income by Category")
-            report_summary = "The bar graph displays your total income grouped by category."
-            if not df_grouped.empty:
-                top_category = df_grouped.loc[df_grouped["amount"].idxmax()]
-                report_stats = f"Top income category: {top_category['category']} with total of ${top_category['amount']:.2f}."
-            else:
-                report_stats = "No statistics available."
-        elif graph_type == "bar_category_expense":
-            df_expense = df[df["transaction_type"] == "expense"]
-            df_expense = df_expense.copy()
-            df_expense["amount"] = df_expense["amount"].abs()
-            df_grouped = df_expense.groupby("category")["amount"].sum().reset_index()
-            fig = px.bar(df_grouped, x="category", y="amount", title="Total Expenses by Category")
-            report_summary = "The bar graph displays your total expenses grouped by category."
-            if not df_grouped.empty:
-                top_category = df_grouped.loc[df_grouped["amount"].idxmax()]
-                report_stats = f"Top expense category: {top_category['category']} with total of ${top_category['amount']:.2f}."
-            else:
-                report_stats = "No statistics available."
-        elif graph_type == "pie_category_income":
-            df_income = df[df["transaction_type"] == "income"]
-            df_grouped = df_income.groupby("category")["amount"].sum().reset_index()
-            fig = px.pie(df_grouped, names="category", values="amount", title="Income Distribution by Category")
-            report_summary = "The pie chart shows the proportion of total income by category."
-            if not df_grouped.empty:
-                top_category = df_grouped.loc[df_grouped["amount"].idxmax()]
-                report_stats = f"Highest income share: {top_category['category']} with ${top_category['amount']:.2f}."
-            else:
-                report_stats = "No statistics available."
-        elif graph_type == "pie_category_expense":
-            df_expense = df[df["transaction_type"] == "expense"]
-            df_expense = df_expense.copy()
-            df_expense["amount"] = df_expense["amount"].abs()
-            df_grouped = df_expense.groupby("category")["amount"].sum().reset_index()
-            fig = px.pie(df_grouped, names="category", values="amount", title="Expenses Distribution by Category")
-            report_summary = "The pie chart shows the proportion of total expenses by category."
-            if not df_grouped.empty:
-                top_category = df_grouped.loc[df_grouped["amount"].idxmax()]
-                report_stats = f"Highest expense share: {top_category['category']} with ${top_category['amount']:.2f}."
-            else:
-                report_stats = "No statistics available."
-        elif graph_type == "pie_income_vs_expenses":
-            total_income = df[df["transaction_type"] == "income"]["amount"].sum()
-            total_expense = abs(df[df["transaction_type"] == "expense"]["amount"].sum())
-            fig = px.pie(names=["Income", "Expenses"], values=[total_income, total_expense], title="Income vs. Expenses")
-            report_summary = "This pie chart compares your total income to your total expenses over the selected period."
-            if total_income + total_expense > 0:
-                perc_income = (total_income / (total_income + total_expense)) * 100
-                perc_expense = (total_expense / (total_income + total_expense)) * 100
-                report_stats = f"Income: {perc_income:.1f}%<br>Expenses: {perc_expense:.1f}%"
-            else:
-                report_stats = "No statistics available."
-        else:
-            fig = px.line(title="No Graph Selected")
-            report_summary = "No valid graph type was selected."
-            report_stats = "No statistics available."
-
-        report_graph = fig.to_html(full_html=False)
-
-    return render_template('dashboard.html', user=user, transactions=transactions, search_query=query,
-                           report_graph=report_graph, report_summary=report_summary, report_stats=report_stats,
-                           selected_graph=selected_graph, selected_period=selected_period)
+    return render_template('dashboard.html', user=user, transactions=transactions, search_query=query)
 
 @app.route('/update_balance', methods=['POST'])
 def update_balance():
@@ -311,6 +157,7 @@ def add_transaction():
         transaction_type = request.form.get('transaction_type')  # "income" or "expense"
         recurrence = int(request.form.get('recurrence', 0))
         description = request.form.get('description')
+        # Ensure the amount is positive for income and negative for expense.
         if transaction_type == "expense":
             amount = -abs(amount)
         else:

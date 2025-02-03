@@ -209,3 +209,29 @@ footer {
     margin-top: 2rem;
     font-size: 0.9rem;
 }
+/* Style for the account balance input to match total income/expense amounts */
+.balance-input {
+    font-size: 1.5rem;        /* Match the font size of the amounts */
+    padding: 0.5rem;
+    width: 100%;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Style for the update button to match the website's theme */
+.update-button {
+    background-color: #1e90ff; /* Matches the navigation button background */
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.update-button:hover {
+    background-color: #104e8b;
+}

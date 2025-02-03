@@ -27,13 +27,12 @@
         <!-- Summary Section -->
         <section id="summary" class="summary-section">
             <h1>Welcome Back, {{ user.first_name }}!</h1>
-            <p>If you are a new user, update your account balance by entering the amount and clicking "Update".</p>
             <div class="summary-cards">
                 <div class="card">
                     <h2>Account Balance</h2>
                     <form action="{{ url_for('update_balance') }}" method="POST">
-                        <input class="balance-input" type="text" name="balance" value="{{ user.balance }}">
-                        <button class="update-button" type="submit">Update</button>
+                        <input type="text" name="balance" value="{{ user.balance }}">
+                        <button type="submit">Update</button>
                     </form>
                 </div>
                 <div class="card">
@@ -54,7 +53,6 @@
         <!-- Transactions Section -->
         <section id="transactions" class="transactions-section">
             <h2>Your Transactions</h2>
-            <p>Click 'Add Transaction' to start. Enter all of data asked. For recurrence, type '0' if it is a one time payment, otherwise, select after how many days the payment will recurr.</p>
             <div class="transaction-controls">
                 <form method="GET" action="{{ url_for('dashboard') }}" style="flex:1;">
                     <input type="text" name="q" placeholder="Search transactions..." value="{{ search_query|default('') }}">
@@ -98,41 +96,11 @@
         <!-- Reports Section -->
         <section id="reports" class="reports-section">
             <h2>Reports</h2>
-            <p>Customize your report by selecting the graph type and period:</p>
-            <form id="reportForm" method="POST" action="{{ url_for('dashboard') }}">
-                <label for="graph_type">Graph Type:</label>
-                <select name="graph_type" id="graph_type" required>
-                    <option value="balance_time" {% if selected_graph=='balance_time' %}selected{% endif %}>Account Balance vs. Time</option>
-                    <option value="income_expenses_time" {% if selected_graph=='income_expenses_time' %}selected{% endif %}>Income/Expenses vs. Time</option>
-                    <option value="bar_category_income" {% if selected_graph=='bar_category_income' %}selected{% endif %}>Bar Graph of Income by Category</option>
-                    <option value="bar_category_expense" {% if selected_graph=='bar_category_expense' %}selected{% endif %}>Bar Graph of Expenses by Category</option>
-                    <option value="pie_category_income" {% if selected_graph=='pie_category_income' %}selected{% endif %}>Pie Chart of Income by Category</option>
-                    <option value="pie_category_expense" {% if selected_graph=='pie_category_expense' %}selected{% endif %}>Pie Chart of Expenses by Category</option>
-                    <option value="pie_income_vs_expenses" {% if selected_graph=='pie_income_vs_expenses' %}selected{% endif %}>Pie Chart: Income vs. Expenses</option>
-                </select>
-                <label for="period">Time Period:</label>
-                <select name="period" id="period" required>
-                    <option value="week" {% if selected_period=='week' %}selected{% endif %}>1 Week</option>
-                    <option value="month" {% if selected_period=='month' %}selected{% endif %}>1 Month</option>
-                    <option value="year" {% if selected_period=='year' %}selected{% endif %}>1 Year</option>
-                    <option value="all" {% if selected_period=='all' %}selected{% endif %}>All Time</option>
-                </select>
-                <button type="submit">Generate Report</button>
-            </form>
-            {% if report_graph %}
-            <div class="report-summary">
-                <p>{{ report_summary }}</p>
+            <p>Analyze your spending patterns:</p>
+            <div class="report-graphs">
+                <div class="graph">Bar Graph (Income vs. Expenses)</div>
+                <div class="graph">Pie Chart (Spending Categories)</div>
             </div>
-            <div class="report-graph">
-                {{ report_graph | safe }}
-            </div>
-            <div class="report-stats">
-                <p>{{ report_stats | safe }}</p>
-            </div>
-            <div class="report-text">
-                <p>{{ report_text }}</p>
-            </div>
-            {% endif %}
         </section>
     </main>
 
@@ -167,19 +135,6 @@
             <button type="submit" id="modalSubmitButton">Save</button>
             <button type="button" onclick="closeTransactionModal()">Cancel</button>
         </form>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            <script>
-              document.addEventListener('DOMContentLoaded', function() {
-                {% for category, message in messages %}
-                  {% if category == 'error' %}
-                    alert("{{ message }}");
-                  {% endif %}
-                {% endfor %}
-              });
-            </script>
-          {% endif %}
-        {% endwith %}
     </div>
 
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>

@@ -40,6 +40,25 @@
       </section>
     </main>
 
+        <!-- Other HTML content -->
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <script>
+            document.addEventListener('DOMContentLoaded', function() {
+              {% for category, message in messages %}
+                {% if category == 'success' %}
+                  alert("{{ message|escape }}");
+                {% endif %}
+              {% endfor %}
+            });
+          </script>
+        {% endif %}
+      {% endwith %}
+  </body>
+  </html>
+  
+
     <footer>
       <p>&copy; 2025 FinanceEase. All Rights Reserved.</p>
     </footer>
