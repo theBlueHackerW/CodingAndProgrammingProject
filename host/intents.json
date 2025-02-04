@@ -1,0 +1,164 @@
+{
+  "intents": [
+    {
+      "tag": "greeting",
+      "patterns": [
+        "Hi",
+        "Hey",
+        "How are you",
+        "Is anyone there?",
+        "Hello",
+        "Good day"
+      ],
+      "responses": [
+        "Hey :-)",
+        "Hello, thanks for visiting",
+        "Hi there, what can I do for you?",
+        "Hi there, how can I help?"
+      ]
+    },
+    {
+      "tag": "goodbye",
+      "patterns": [
+        "Bye",
+        "See you later",
+        "Goodbye"
+      ],
+      "responses": [
+        "See you later, thanks for visiting",
+        "Have a nice day",
+        "Bye! Come back again soon."
+      ]
+    },
+    {
+      "tag": "thanks",
+      "patterns": [
+        "Thanks",
+        "Thank you",
+        "That's helpful",
+        "Thanks a lot!"
+      ],
+      "responses": [
+        "Happy to help!",
+        "Any time!",
+        "My pleasure"
+      ]
+    },
+    {
+      "tag": "items",
+      "patterns": [
+        "Which items do you have?",
+        "What kinds of items are there?",
+        "What do you sell?"
+      ],
+      "responses": [
+        "We sell coffee and tea",
+        "We have coffee and tea"
+      ]
+    },
+    {
+      "tag": "payments",
+      "patterns": [
+        "Do you take credit cards?",
+        "Do you accept Mastercard?",
+        "Can I pay with Paypal?",
+        "Are you cash only?"
+      ],
+      "responses": [
+        "We accept VISA, Mastercard and Paypal",
+        "We accept most major credit cards, and Paypal"
+      ]
+    },
+    {
+      "tag": "delivery",
+      "patterns": [
+        "How long does delivery take?",
+        "How long does shipping take?",
+        "When do I get my delivery?"
+      ],
+      "responses": [
+        "Delivery takes 2-4 days",
+        "Shipping takes 2-4 days"
+      ]
+    },
+    {
+      "tag": "funny",
+      "patterns": [
+        "Tell me a joke!",
+        "Tell me something funny!",
+        "Do you know a joke?"
+      ],
+      "responses": [
+        "Why did the hipster burn his mouth? He drank the coffee before it was cool.",
+        "What did the buffalo say when his son left for college? Bison."
+      ]
+    },
+    {
+      "tag": "transactions_help",
+      "patterns": [
+        "How do I add a transaction?",
+        "How do I edit a transaction?",
+        "How do I delete a transaction?",
+        "Show me how to manage transactions",
+        "What can I do with transactions?"
+      ],
+      "responses": [
+        "To manage your transactions, click the 'Add Transaction' button in the Transactions section. Fill out the form with details like amount, category, and type, then save the transaction. You can edit any transaction by clicking the 'Edit' button next to it or delete it with the 'Delete' button.",
+        "Use the Transactions section to add, edit, or delete transactions. Simply click 'Add Transaction' to input a new record, and use the corresponding 'Edit' or 'Delete' buttons beside existing entries to make changes."
+      ]
+    },
+    {
+      "tag": "average_spending_help",
+      "patterns": [
+        "How can I see my average daily spending?",
+        "How do I check my average spending?",
+        "What is my average spending?",
+        "Show my daily spending"
+      ],
+      "responses": [
+        "To view your average spending, go to the Reports section and select the 'Income/Expenses vs. Time' graph. The displayed statistics will include your average daily spending along with other insights.",
+        "Navigate to the Reports section, choose the appropriate graph type and time period, and you’ll see your average spending calculated as part of the overall financial statistics."
+      ]
+    },
+    {
+      "tag": "report_help",
+      "patterns": [
+        "How do I generate a financial report?",
+        "How do I generate a report?",
+        "I need a financial report",
+        "Show me a report"
+      ],
+      "responses": [
+        "To generate a report, head to the Reports section. Select a graph type—such as 'Account Balance vs. Time' or 'Income vs. Expenses'—and choose a time period (week, month, year, or all). Click 'Generate Report' to view visual insights and detailed statistics on your financial trends.",
+        "Generate your report by navigating to the Reports section, picking your preferred graph type and period, and clicking the 'Generate Report' button. This will provide you with graphs and statistics that reveal your financial patterns."
+      ]
+    },
+    {
+      "tag": "account_management_help",
+      "patterns": [
+        "How do I log in?",
+        "How do I create an account?",
+        "How do I log out?",
+        "Account management",
+        "Help with my account"
+      ],
+      "responses": [
+        "To create an account, click 'Create Account' on the home page and fill out the registration form. Log in by clicking 'Log In' and entering your credentials. To log out, simply click the 'Log Out' button in the navigation bar.",
+        "Account management is simple: create an account from the home page, log in with your credentials, and use the 'Log Out' button when you're finished. All account-related actions can be performed from the dashboard."
+      ]
+    },
+    {
+      "tag": "site_usage_help",
+      "patterns": [
+        "How do I use this website?",
+        "What can I do on this site?",
+        "Help me use the website",
+        "How do I navigate this website?"
+      ],
+      "responses": [
+        "This website lets you manage your finances in one place. You can update your account balance, record transactions, and generate customizable reports to analyze your spending, income, and trends.",
+        "On this site, you can view your financial summary, manage transactions, and generate reports that provide visual insights into your financial habits. The dashboard is designed for easy navigation and quick access to all features."
+      ]
+    }
+  ]
+}

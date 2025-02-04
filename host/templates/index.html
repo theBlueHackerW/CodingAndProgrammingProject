@@ -11,7 +11,6 @@
       <div class="nav-bar">
         <div class="logo">FinanceEase</div>
         <div class="auth-buttons">
-          <!-- Changed links to buttons that call JavaScript functions -->
           <button class="button" onclick="goToLogin()">Log In</button>
           <button class="button" onclick="goToCreateAccount()">Create Account</button>
         </div>
@@ -40,28 +39,28 @@
       </section>
     </main>
 
-        <!-- Other HTML content -->
+    <!-- Chatbot Button and Window -->
+    <div id="chatbotWindow">
+      <header>Help</header>
+      <textarea id="chatbotInput" placeholder="Ask a question about the website..."></textarea>
+      <button onclick="sendChatbotQuery()">Send</button>
+      <div id="chatbotResponse"></div>
+    </div>
+    <div id="chatbotButton" onclick="toggleChatbotWindow()">?</div>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          <script>
-            document.addEventListener('DOMContentLoaded', function() {
-              {% for category, message in messages %}
-                {% if category == 'success' %}
-                  alert("{{ message|escape }}");
-                {% endif %}
-              {% endfor %}
-            });
-          </script>
-        {% endif %}
-      {% endwith %}
-  </body>
-  </html>
-  
-
-    <footer>
-      <p>&copy; 2025 FinanceEase. All Rights Reserved.</p>
-    </footer>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          {% for category, message in messages %}
+            {% if category == 'success' %}
+              alert("{{ message|escape }}");
+            {% endif %}
+          {% endfor %}
+        });
+      </script>
+    {% endif %}
+    {% endwith %}
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
   </body>

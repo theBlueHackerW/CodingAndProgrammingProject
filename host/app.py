@@ -1,15 +1,19 @@
+# --- Imports and Module Setup ---
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import pandas as pd
 import plotly.express as px
+from chat import get_response   # Function to handle chatbot queries (rule-based or model-based)
 
+# --- Flask Application Configuration ---
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Replace with your actual secret key
+app.secret_key = 'your_secret_key'  # Secret key for sessions and flash messages
 
-# Main database for user accounts (accounts.db)
+# --- Database Configuration ---
+# Primary database (accounts.db) for user data
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///accounts.db'
-# Additional bind for transactions (transactions.db)
+# Additional bind (transactions.db) for transaction data
 app.config['SQLALCHEMY_BINDS'] = {
     'transactions': 'sqlite:///transactions.db'
 }
@@ -17,10 +21,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# -----------------------------
-# Models
-# -----------------------------
-
+# --- Models Definition ---
+# User model for storing account information
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name   = db.Column(db.String(50), nullable=False)
@@ -28,38 +30,39 @@ class User(db.Model):
     email        = db.Column(db.String(120), unique=True, nullable=False)
     username     = db.Column(db.String(80), unique=True, nullable=False)
     password     = db.Column(db.String(100), nullable=False)
-    security_code= db.Column(db.String(4), nullable=False)  # 4-digit security code
-    balance      = db.Column(db.Float, default=0.0)  # Default balance is 0
+    security_code= db.Column(db.String(4), nullable=False)  # 4-digit code
+    balance      = db.Column(db.Float, default=0.0)  # User’s account balance
 
     def __repr__(self):
         return f'<User {self.username}>'
 
+# Transaction model for storing financial transactions; uses separate database bind
 class Transaction(db.Model):
     __bind_key__ = 'transactions'
     id = db.Column(db.Integer, primary_key=True)
-    # Instead of a foreign key, we store the username as a string.
-    username = db.Column(db.String(80), nullable=False)
+    username = db.Column(db.String(80), nullable=False)  # Linking transactions via username
     transaction_date = db.Column(db.DateTime, default=datetime.utcnow)
     amount = db.Column(db.Float, nullable=False)
     category = db.Column(db.String(50))
     transaction_type = db.Column(db.String(10))  # 'income' or 'expense'
-    recurrence = db.Column(db.Integer, default=0)  # 0 = one-time; otherwise recurring (in days)
+    recurrence = db.Column(db.Integer, default=0)  # 0 for one-time; otherwise recurring (in days)
     description = db.Column(db.String(200))
 
     def __repr__(self):
         return f'<Transaction {self.id} {self.transaction_type} {self.amount}>'
 
-# -----------------------------
-# Routes
-# -----------------------------
+# --- Route Definitions ---
 
+# Home page route - renders index.html
 @app.route('/')
 def home():
     return render_template('index.html')
 
+# Create Account route - handles GET (display form) and POST (form submission)
 @app.route('/create_account', methods=['GET', 'POST'])
 def create_account():
     if request.method == 'POST':
+        # Extract registration form data
         first_name    = request.form['firstName']
         last_name     = request.form['lastName']
         email         = request.form['email']
@@ -67,6 +70,7 @@ def create_account():
         password      = request.form['password']
         security_code = request.form['securityCode']
 
+        # Check for duplicate username or email
         if User.query.filter_by(username=username).first():
             flash("Username already exists. Please choose a different one.", "error")
             return render_template("createAccount.html")
@@ -74,6 +78,7 @@ def create_account():
             flash("Email already registered. Please use a different email.", "error")
             return render_template("createAccount.html")
 
+        # Create new user and commit to database
         new_user = User(
             first_name=first_name,
             last_name=last_name,
@@ -88,17 +93,19 @@ def create_account():
         return redirect(url_for('login'))
     return render_template("createAccount.html")
 
+# Login route - handles GET (display form) and POST (authenticate user)
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+        # Retrieve login credentials from form
         username      = request.form['username']
-        security_code = request.form['account_code']  # The login form uses this field name
+        security_code = request.form['account_code']  # Field name for security code
         password      = request.form['password']
 
         user = User.query.filter_by(username=username, password=password).first()
         if user:
             if user.security_code == security_code:
-                session['user_id'] = user.id
+                session['user_id'] = user.id  # Store user id in session for authentication
                 flash("Login successful!", "success")
                 return redirect(url_for('dashboard'))
             else:
@@ -108,13 +115,14 @@ def login():
         return render_template("login.html")
     return render_template("login.html")
 
+# Logout route - removes user session and redirects to home
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)
     flash("Logged out successfully.", "success")
     return redirect(url_for('home'))
 
-# The dashboard route now handles both GET and POST (for report generation)
+# Dashboard route - handles both GET (display dashboard) and POST (generate report)
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if 'user_id' not in session:
@@ -130,14 +138,14 @@ def dashboard():
         )
     transactions = transactions_query.all()
 
-    # Initialize report variables
+    # Initialize variables for report
     report_graph = None
     report_summary = ""
     report_stats = ""
     selected_graph = None
     selected_period = None
 
-    # If the report form was submitted via POST, generate the graph and statistics
+    # Process report form submission (POST) for generating graph & stats
     if request.method == 'POST':
         graph_type = request.form.get('graph_type')
         period = request.form.get('period')
@@ -151,7 +159,7 @@ def dashboard():
             start_date = end_date - pd.Timedelta(days=30)
         elif period == "year":
             start_date = end_date - pd.Timedelta(days=365)
-        else:  # "all" or unspecified
+        else:
             start_date = None
 
         report_query = Transaction.query.filter_by(username=user.username)
@@ -162,6 +170,7 @@ def dashboard():
             )
         report_transactions = report_query.all()
 
+        # Build DataFrame from transactions for reporting
         if report_transactions:
             data = {
                 "date": [tx.transaction_date for tx in report_transactions],
@@ -173,7 +182,7 @@ def dashboard():
         else:
             df = pd.DataFrame(columns=["date", "amount", "transaction_type", "category"])
 
-        # Generate graph and statistics based on the selected graph type
+        # Generate graph and financial statistics based on selected graph type
         if graph_type == "balance_time":
             df_sorted = df.sort_values("date")
             if not df_sorted.empty:
@@ -400,35 +409,40 @@ def check_user():
     
     return jsonify({"errors": errors}), 200
 
-@app.route('/graph_data', methods=['POST'])
-def graph_data():
-    if 'user_id' not in session:
-        return jsonify({"error": "Unauthorized"}), 403
+# New route to handle chatbot queries (for website help)
+@app.route('/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    question = data.get("question", "").lower()
+    # Basic rule-based responses for common website usage questions
+    if "average daily spending" in question:
+        answer = "To view your average daily spending, generate a report in the Reports section."
+    elif "report" in question:
+        answer = "Select a graph type and time period in the Reports section to generate a financial report."
+    elif "update balance" in question:
+        answer = "Enter a new value in the Account Balance section and click Update."
+    elif "add transaction" in question:
+        answer = "Click the 'Add Transaction' button to record a new transaction."
+    elif "edit transaction" in question:
+        answer = "Click the 'Edit' button next to a transaction to modify it."
+    elif "delete transaction" in question:
+        answer = "Click the 'Delete' button next to a transaction to remove it."
+    elif "log out" in question:
+        answer = "Click the Log Out button in the navigation bar to sign out."
+    elif "create account" in question:
+        answer = "Click 'Create Account' on the home page to register."
+    elif "login" in question:
+        answer = "Click 'Log In' on the home page and enter your credentials."
+    else:
+        answer = "I'm sorry, I don't have an answer for that. Please refer to the help section for more details."
+    return jsonify({"answer": answer})
 
-    user = User.query.get(session['user_id'])
-
-    transactions = Transaction.query.filter_by(username=user.username).all()
-    
-    income_total = sum(tx.amount for tx in transactions if tx.transaction_type == "income")
-    expense_total = sum(abs(tx.amount) for tx in transactions if tx.transaction_type == "expense")
-
-    category_totals = {}
-    for tx in transactions:
-        if tx.transaction_type == "expense":  # Only track expenses
-            category_totals[tx.category] = category_totals.get(tx.category, 0) + abs(tx.amount)
-
-    return jsonify({
-        "income_vs_expense": {"income": income_total, "expenses": expense_total},
-        "category_distribution": category_totals
-    })
-
-# -----------------------------
-# Create databases if they don't exist
-# -----------------------------
+# --- Database Initialization ---
 with app.app_context():
-    db.create_all()  # Creates tables for accounts.db
+    db.create_all()  # Create tables for accounts.db
     engine = db.get_engine(app, bind='transactions')
     Transaction.metadata.create_all(engine)
 
+# --- Main Application Runner ---
 if __name__ == "__main__":
     app.run(debug=True)

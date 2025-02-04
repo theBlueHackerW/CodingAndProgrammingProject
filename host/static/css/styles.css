@@ -127,3 +127,58 @@ footer {
     color: #fff;
     margin-top: 2rem;
 }
+
+/* Chatbot button style (circular question mark) */
+#chatbotButton {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background-color: #1e90ff;
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 60px;
+    font-size: 32px;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+/* Chatbot window style */
+#chatbotWindow {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 300px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    padding: 10px;
+}
+
+#chatbotWindow header {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+#chatbotWindow textarea {
+    width: 100%;
+    height: 60px;
+    resize: none;
+}
+
+#chatbotWindow button {
+    margin-top: 5px;
+    background-color: #1e90ff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}

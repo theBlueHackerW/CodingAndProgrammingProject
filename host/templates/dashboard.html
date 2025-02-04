@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinanceEase Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0"></script>
-
 </head>
-
 <body>
     <!-- Navigation Bar -->
     <header>
@@ -30,13 +27,12 @@
         <!-- Summary Section -->
         <section id="summary" class="summary-section">
             <h1>Welcome Back, {{ user.first_name }}!</h1>
-            <p>If you are a new user, update your account balance by entering the amount and clicking "Update".</p>
             <div class="summary-cards">
                 <div class="card">
                     <h2>Account Balance</h2>
                     <form action="{{ url_for('update_balance') }}" method="POST">
-                        <input class="balance-input" type="text" name="balance" value="{{ user.balance }}">
-                        <button class="update-button" type="submit">Update</button>
+                        <input type="text" name="balance" value="{{ user.balance }}">
+                        <button type="submit">Update</button>
                     </form>
                 </div>
                 <div class="card">
@@ -57,7 +53,6 @@
         <!-- Transactions Section -->
         <section id="transactions" class="transactions-section">
             <h2>Your Transactions</h2>
-            <p>Click 'Add Transaction' to start. Enter all of data asked. For recurrence, type '0' if it is a one time payment, otherwise, select after how many days the payment will recurr.</p>
             <div class="transaction-controls">
                 <form method="GET" action="{{ url_for('dashboard') }}" style="flex:1;">
                     <input type="text" name="q" placeholder="Search transactions..." value="{{ search_query|default('') }}">
@@ -101,7 +96,7 @@
         <!-- Reports Section -->
         <section id="reports" class="reports-section">
             <h2>Reports</h2>
-            <p>Customize your report by selecting the graph type and period:</p>
+            <p>Customize your report:</p>
             <form id="reportForm" method="POST" action="{{ url_for('dashboard') }}">
                 <label for="graph_type">Graph Type:</label>
                 <select name="graph_type" id="graph_type" required>
@@ -125,72 +120,27 @@
             {% if report_graph %}
             <div class="report-summary">
                 <p>{{ report_summary }}</p>
-            <p>Analyze your spending patterns:</p>
+            </div>
             <div class="report-graph">
                 {{ report_graph | safe }}
             </div>
             <div class="report-stats">
                 <p>{{ report_stats | safe }}</p>
             </div>
-            <div class="report-text">
-                <p>{{ report_text }}</p>
-            </div>
             {% endif %}
         </section>
     </main>
 
-    <!-- Transaction Modal (for adding/editing) -->
-    <div id="transactionModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:#fff; padding:20px; border:1px solid #ddd; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
-        <h2 id="modalTitle">Add Transaction</h2>
-        <form id="transactionForm" method="POST" action="{{ url_for('add_transaction') }}">
-            <input type="hidden" name="tx_id" id="tx_id" value="">
-            <div class="form-group">
-                <label for="amount">Amount:</label>
-                <input type="text" name="amount" id="amount" required>
-            </div>
-            <div class="form-group">
-                <label for="category">Category:</label>
-                <input type="text" name="category" id="category" required>
-            </div>
-            <div class="form-group">
-                <label for="transaction_type">Type:</label>
-                <select name="transaction_type" id="transaction_type" required>
-                    <option value="income">Income</option>
-                    <option value="expense">Expense</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="recurrence">Recurrence (days, 0 for one-time):</label>
-                <input type="number" name="recurrence" id="recurrence" value="0" min="0" required>
-            </div>
-            <div class="form-group">
-                <label for="description">Description:</label>
-                <textarea name="description" id="description"></textarea>
-            </div>
-            <button type="submit" id="modalSubmitButton">Save</button>
-            <button type="button" onclick="closeTransactionModal()">Cancel</button>
-        </form>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            <script>
-              document.addEventListener('DOMContentLoaded', function() {
-                {% for category, message in messages %}
-                  {% if category == 'error' %}
-                    alert("{{ message }}");
-                  {% endif %}
-                {% endfor %}
-              });
-            </script>
-          {% endif %}
-        {% endwith %}
+    <!-- Chatbot Button and Window -->
+    <div id="chatbotWindow">
+      <header>Help</header>
+      <textarea id="chatbotInput" placeholder="Ask a question about the website..."></textarea>
+      <button onclick="sendChatbotQuery()">Send</button>
+      <div id="chatbotResponse"></div>
     </div>
+    <div id="chatbotButton" onclick="toggleChatbotWindow()">?</div>
 
-    <!-- Include Chart.js -->
-
-    <!-- Dashboard Script -->
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-
-    <!-- Script for Fetching and Rendering Charts -->
-    
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
