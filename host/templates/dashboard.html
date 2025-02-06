@@ -37,6 +37,7 @@
                 </div>
                 <div class="card">
                     <h2>Total Income</h2>
+                    <!--Retreives the total income and expenses from the database-->
                     <p>
                         ${{ "%.2f"|format(transactions | selectattr("transaction_type", "equalto", "income") | map(attribute="amount") | sum) }}
                     </p>
@@ -130,14 +131,61 @@
             {% endif %}
         </section>
     </main>
+    <!-- Transaction Modal (for adding/editing) -->
+    <div id="transactionModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:#fff; padding:20px; border:1px solid #ddd; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+        <h2 id="modalTitle">Add Transaction</h2>
+        <form id="transactionForm" method="POST" action="{{ url_for('add_transaction') }}">
+            <input type="hidden" name="tx_id" id="tx_id" value="">
+            <div class="form-group">
+                <label for="amount">Amount:</label>
+                <input type="text" name="amount" id="amount" required>
+            </div>
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <input type="text" name="category" id="category" required>
+            </div>
+            <div class="form-group">
+                <label for="transaction_type">Type:</label>
+                <select name="transaction_type" id="transaction_type" required>
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="recurrence">Recurrence (days, 0 for one-time):</label>
+                <input type="number" name="recurrence" id="recurrence" value="0" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea name="description" id="description"></textarea>
+            </div>
+            <button type="submit" id="modalSubmitButton">Save</button>
+            <button type="button" onclick="closeTransactionModal()">Cancel</button>
+        </form>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                {% for category, message in messages %}
+                {% if category == 'error' %}
+                    alert("{{ message }}");
+                {% endif %}
+                {% endfor %}
+            });
+            </script>
+        {% endif %}
+        {% endwith %}
+    </div>
 
     <!-- Chatbot Button and Window -->
     <div id="chatbotWindow">
       <header>Help</header>
+      <!--Place to ask question-->
       <textarea id="chatbotInput" placeholder="Ask a question about the website..."></textarea>
       <button onclick="sendChatbotQuery()">Send</button>
       <div id="chatbotResponse"></div>
     </div>
+    <!--Click the ? to open and close the window-->
     <div id="chatbotButton" onclick="toggleChatbotWindow()">?</div>
 
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>

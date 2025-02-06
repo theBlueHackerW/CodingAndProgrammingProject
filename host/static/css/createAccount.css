@@ -20,7 +20,7 @@ header {
     text-align: center;
     margin-bottom: 1rem;
 }
-
+/*Sets the blue theme*/
 header h1 {
     font-size: 2rem;
     color: #1e90ff;
@@ -64,7 +64,7 @@ input:focus {
     outline: none;
     box-shadow: 0 0 5px rgba(30, 144, 255, 0.5);
 }
-
+/*Sets button to the unique design*/
 button {
     background-color: #1e90ff;
     color: #fff;

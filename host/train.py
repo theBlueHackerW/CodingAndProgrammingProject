@@ -28,10 +28,10 @@ for intent in intents['intents']:
         # add to xy pair
         xy.append((w, tag))
 
-# stem and lower each word
+# stem and lower each word, list of ignore and allowed words
 ignore_words = ['?', '.', '!']
 all_words = [stem(w) for w in all_words if w not in ignore_words]
-# remove duplicates and sort
+# remove duplicates and sort the lists; sets a list of tags
 all_words = sorted(set(all_words))
 tags = sorted(set(tags))
 

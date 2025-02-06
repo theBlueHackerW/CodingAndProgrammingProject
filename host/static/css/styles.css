@@ -31,7 +31,7 @@ header {
     font-size: 1.5rem;
     font-weight: bold;
 }
-
+/*Setting the button themes*/
 .auth-buttons button {
     background-color: #fff;
     color: #1e90ff;
@@ -75,7 +75,7 @@ header {
     font-size: 1.2rem;
     margin-bottom: 1.5rem;
 }
-
+/*Sets background colour and theme of the website*/
 .get-started {
     background-color: #1e90ff;
     color: #fff;

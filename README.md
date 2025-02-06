@@ -68,6 +68,12 @@ Ensure you have the following installed:
 - **Frontend:** HTML, CSS, JavaScript, Jinja2
 - **Visualization:** Plotly, Chart.js
 - **Authentication & Security:** Flask-Session, Flask-Flash
+- **Machine Learning with Vectors:** PyTorch
+- **Natural Language Processing:** NLTK
+- **Base AI Model:** Patrick Leober's Base Model
+
+## Credits
+The chatbot was inspire by Patrick Loeber's basic chatbot tutorial. Many thanks to Mr. Loeber for this repository at https://github.com/patrickloeber/pytorch-chatbot
 
 ## File Structure
 ```

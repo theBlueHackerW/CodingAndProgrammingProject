@@ -1,4 +1,4 @@
-// Existing transaction modal functions
+// Existing transaction modal functions and sets the front end for each table
 function openAddTransactionModal() {
     document.getElementById('modalTitle').innerText = "Add Transaction";
     document.getElementById('transactionForm').action = "/add_transaction";
@@ -11,6 +11,7 @@ function openAddTransactionModal() {
     document.getElementById('transactionModal').style.display = "block";
 }
 
+//Same as adding but edits and existing transaction
 function openEditTransactionModal(id, category, amount, type, description, recurrence) {
     document.getElementById('modalTitle').innerText = "Edit Transaction";
     document.getElementById('transactionForm').action = "/edit_transaction/" + id;
@@ -27,16 +28,17 @@ function closeTransactionModal() {
     document.getElementById('transactionModal').style.display = "none";
 }
 
-// Chatbot window functionality for the dashboard page
+// Chatbot window opens
+
 function toggleChatbotWindow() {
-    const chatbotWindow = document.getElementById("chatbotWindow");
+    var chatbotWindow = document.getElementById("chatbotWindow");
     if (chatbotWindow.style.display === "none" || chatbotWindow.style.display === "") {
-        chatbotWindow.style.display = "block";
+        chatbotWindow.style.display = "flex";
     } else {
         chatbotWindow.style.display = "none";
     }
-}
-
+  }
+//Sends the inputted values to the backend, which is then taken to the AI bot's generate_response()
 function sendChatbotQuery() {
     const inputField = document.getElementById("chatbotInput");
     const question = inputField.value;
@@ -45,6 +47,7 @@ function sendChatbotQuery() {
         chatbotResponse.innerHTML = "<p>Please enter a question.</p>";
         return;
     }
+    //Uses post method to send the question and retreive answer
     fetch("/chat", {
         method: "POST",
         headers: {
@@ -52,10 +55,12 @@ function sendChatbotQuery() {
         },
         body: JSON.stringify({ question: question })
     })
+    //collects the response an puts it onto the HTML page
     .then(response => response.json())
     .then(data => {
         chatbotResponse.innerHTML = "<p>" + data.answer + "</p>";
     })
+    //Syntatic error handling
     .catch(error => {
         chatbotResponse.innerHTML = "<p>Error: " + error + "</p>";
     });

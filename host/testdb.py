@@ -1,3 +1,4 @@
+#not relevant to program, created purely for testing purposes
 from app import app, db
 
 with app.app_context():

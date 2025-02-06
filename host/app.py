@@ -70,15 +70,16 @@ def create_account():
         password      = request.form['password']
         security_code = request.form['securityCode']
 
-        # Check for duplicate username or email
+        # Checks for duplicate usernames
         if User.query.filter_by(username=username).first():
             flash("Username already exists. Please choose a different one.", "error")
             return render_template("createAccount.html")
+        # Checks for duplicate email addresses
         if User.query.filter_by(email=email).first():
             flash("Email already registered. Please use a different email.", "error")
             return render_template("createAccount.html")
 
-        # Create new user and commit to database
+        # Sets all of the inputed data into the class User
         new_user = User(
             first_name=first_name,
             last_name=last_name,
@@ -87,6 +88,7 @@ def create_account():
             password=password,
             security_code=security_code
         )
+        # Adds that user to the database accounts.db
         db.session.add(new_user)
         db.session.commit()
         flash("Account created successfully! Please log in.", "success")
@@ -102,20 +104,23 @@ def login():
         security_code = request.form['account_code']  # Field name for security code
         password      = request.form['password']
 
+        # Athenticates username and password
         user = User.query.filter_by(username=username, password=password).first()
         if user:
+            #Auntheticates security code
             if user.security_code == security_code:
                 session['user_id'] = user.id  # Store user id in session for authentication
                 flash("Login successful!", "success")
                 return redirect(url_for('dashboard'))
             else:
+        # Shows error messages
                 flash("Invalid security code.", "error")
         else:
             flash("Invalid username or password.", "error")
         return render_template("login.html")
     return render_template("login.html")
 
-# Logout route - removes user session and redirects to home
+# Logout route (URL) - removes user session and redirects to home
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)
@@ -125,11 +130,14 @@ def logout():
 # Dashboard route - handles both GET (display dashboard) and POST (generate report)
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
+    #Blocks the user from being able use URL manipulation to bypass security measures.
     if 'user_id' not in session:
         flash("Please log in first.", "error")
         return redirect(url_for('login'))
+    #Creates a session for a specific user so they do not have to keep logging in
     user = User.query.get(session['user_id'])
     query = request.args.get('q', '')
+    #Queries the transactions database for specific transactions based on the user that is logged in
     transactions_query = Transaction.query.filter_by(username=user.username)
     if query:
         transactions_query = transactions_query.filter(
@@ -138,7 +146,7 @@ def dashboard():
         )
     transactions = transactions_query.all()
 
-    # Initialize variables for report
+    # Initialize variables and text for report
     report_graph = None
     report_summary = ""
     report_stats = ""
@@ -151,7 +159,7 @@ def dashboard():
         period = request.form.get('period')
         selected_graph = graph_type
         selected_period = period
-
+# This if statement changes the graphs based on the timeframe selected
         end_date = datetime.utcnow()
         if period == "week":
             start_date = end_date - pd.Timedelta(days=7)
@@ -161,7 +169,7 @@ def dashboard():
             start_date = end_date - pd.Timedelta(days=365)
         else:
             start_date = None
-
+        #Collects the information for the report
         report_query = Transaction.query.filter_by(username=user.username)
         if start_date:
             report_query = report_query.filter(
@@ -185,6 +193,7 @@ def dashboard():
         # Generate graph and financial statistics based on selected graph type
         if graph_type == "balance_time":
             df_sorted = df.sort_values("date")
+            #Sets up first graph type and statistics
             if not df_sorted.empty:
                 computed_balance = df_sorted["amount"].cumsum()
                 offset = user.balance - computed_balance.iloc[-1]
@@ -206,6 +215,7 @@ def dashboard():
                 fig = px.line(title="Account Balance Over Time")
                 report_summary = "No transactions available for the selected period."
                 report_stats = "No statistics available."
+        #Initializes income and expenses vs. time
         elif graph_type == "income_expenses_time":
             df_income = df[df["transaction_type"] == "income"].sort_values("date")
             df_expense = df[df["transaction_type"] == "expense"].sort_values("date")
@@ -226,6 +236,7 @@ def dashboard():
                 f"Total expenses: ${total_expense:.2f}"
             ]
             report_stats = "<br>".join(stats_list)
+            #Initializes bar graph of income categories
         elif graph_type == "bar_category_income":
             df_income = df[df["transaction_type"] == "income"]
             df_grouped = df_income.groupby("category")["amount"].sum().reset_index()
@@ -236,6 +247,7 @@ def dashboard():
                 report_stats = f"Top income category: {top_category['category']} with total of ${top_category['amount']:.2f}."
             else:
                 report_stats = "No statistics available."
+                #Initializes bar graph of expenses categories
         elif graph_type == "bar_category_expense":
             df_expense = df[df["transaction_type"] == "expense"]
             df_expense = df_expense.copy()
@@ -249,6 +261,7 @@ def dashboard():
             else:
                 report_stats = "No statistics available."
         elif graph_type == "pie_category_income":
+            #pie chart of income
             df_income = df[df["transaction_type"] == "income"]
             df_grouped = df_income.groupby("category")["amount"].sum().reset_index()
             fig = px.pie(df_grouped, names="category", values="amount", title="Income Distribution by Category")
@@ -259,6 +272,7 @@ def dashboard():
             else:
                 report_stats = "No statistics available."
         elif graph_type == "pie_category_expense":
+            #pie chart of expenses
             df_expense = df[df["transaction_type"] == "expense"]
             df_expense = df_expense.copy()
             df_expense["amount"] = df_expense["amount"].abs()
@@ -271,6 +285,7 @@ def dashboard():
             else:
                 report_stats = "No statistics available."
         elif graph_type == "pie_income_vs_expenses":
+            #pie chart of income and expenses
             total_income = df[df["transaction_type"] == "income"]["amount"].sum()
             total_expense = abs(df[df["transaction_type"] == "expense"]["amount"].sum())
             fig = px.pie(names=["Income", "Expenses"], values=[total_income, total_expense], title="Income vs. Expenses")
@@ -292,34 +307,42 @@ def dashboard():
                            report_graph=report_graph, report_summary=report_summary, report_stats=report_stats,
                            selected_graph=selected_graph, selected_period=selected_period)
 
+#allows user to update their balance or add a balance if they are a new user
 @app.route('/update_balance', methods=['POST'])
 def update_balance():
+    #Asks user to log in if not already logged in
     if 'user_id' not in session:
         flash("Please log in first.", "error")
         return redirect(url_for('login'))
     user = User.query.get(session['user_id'])
+    #Updates the account balance
     try:
         new_balance = float(request.form.get('balance'))
         user.balance = new_balance
         db.session.commit()
         flash("Account balance updated.", "success")
     except Exception as e:
+        #semantic error handling
         db.session.rollback()
         flash("Failed to update balance.", "error")
     return redirect(url_for('dashboard'))
 
+#adds a transaction
 @app.route('/add_transaction', methods=['POST'])
 def add_transaction():
+    #checks if user is logged in
     if 'user_id' not in session:
         flash("Please log in first.", "error")
         return redirect(url_for('login'))
     user = User.query.get(session['user_id'])
     try:
+        #data collection
         amount = float(request.form.get('amount'))
         category = request.form.get('category')
         transaction_type = request.form.get('transaction_type')  # "income" or "expense"
         recurrence = int(request.form.get('recurrence', 0))
         description = request.form.get('description')
+        #Differentiates an expense from an income
         if transaction_type == "expense":
             amount = -abs(amount)
         else:
@@ -332,6 +355,7 @@ def add_transaction():
             recurrence=recurrence,
             description=description
         )
+        #adding to the database to save
         db.session.add(new_tx)
         user.balance += amount
         db.session.commit()
@@ -341,17 +365,21 @@ def add_transaction():
         flash("Error adding transaction.", "error")
     return redirect(url_for('dashboard'))
 
+#edits the transactions if user clicks edit
 @app.route('/edit_transaction/<int:tx_id>', methods=['POST'])
 def edit_transaction(tx_id):
+    #checks user logged in
     if 'user_id' not in session:
         flash("Please log in first.", "error")
         return redirect(url_for('login'))
+    #querries user's transactions through their username
     user = User.query.get(session['user_id'])
     tx = Transaction.query.get(tx_id)
     if tx.username != user.username:
         flash("Not authorized.", "error")
         return redirect(url_for('dashboard'))
     try:
+        #collects edits to made 
         new_amount = float(request.form.get('amount'))
         new_category = request.form.get('category')
         new_type = request.form.get('transaction_type')
@@ -361,6 +389,7 @@ def edit_transaction(tx_id):
             new_amount = -abs(new_amount)
         else:
             new_amount = abs(new_amount)
+        #table is created for the front end side and saves it into a back end column for a database
         old_amount = tx.amount
         tx.amount = new_amount
         tx.category = new_category
@@ -368,6 +397,7 @@ def edit_transaction(tx_id):
         tx.recurrence = new_recurrence
         tx.description = new_description
         user.balance = user.balance - old_amount + new_amount
+        #adds data to database
         db.session.commit()
         flash("Transaction updated successfully.", "success")
     except Exception as e:
@@ -375,26 +405,32 @@ def edit_transaction(tx_id):
         flash("Error updating transaction.", "error")
     return redirect(url_for('dashboard'))
 
+#Transactions can be deleted
 @app.route('/delete_transaction/<int:tx_id>', methods=['POST'])
 def delete_transaction(tx_id):
+    #Checks if user is logged in
     if 'user_id' not in session:
         flash("Please log in first.", "error")
         return redirect(url_for('login'))
     user = User.query.get(session['user_id'])
     tx = Transaction.query.get(tx_id)
+    #Ensures that the correct user's data is being deleted
     if tx.username != user.username:
         flash("Not authorized.", "error")
         return redirect(url_for('dashboard'))
     try:
+        #deletes the transaction and updates balance amount
         user.balance -= tx.amount
         db.session.delete(tx)
         db.session.commit()
         flash("Transaction deleted successfully.", "success")
     except Exception as e:
+        #semantic and syntactical error handling
         db.session.rollback()
         flash("Error deleting transaction.", "error")
     return redirect(url_for('dashboard'))
 
+#the function that ensures that the user that is being logged in is in the database
 @app.route('/check_user', methods=['POST'])
 def check_user():
     data = request.get_json()
@@ -412,29 +448,13 @@ def check_user():
 # New route to handle chatbot queries (for website help)
 @app.route('/chat', methods=['POST'])
 def chat():
+    # Expect a JSON payload with a "question" field.
+    # Takes data from data.pth which is basically json but readable for AI
     data = request.get_json()
-    question = data.get("question", "").lower()
-    # Basic rule-based responses for common website usage questions
-    if "average daily spending" in question:
-        answer = "To view your average daily spending, generate a report in the Reports section."
-    elif "report" in question:
-        answer = "Select a graph type and time period in the Reports section to generate a financial report."
-    elif "update balance" in question:
-        answer = "Enter a new value in the Account Balance section and click Update."
-    elif "add transaction" in question:
-        answer = "Click the 'Add Transaction' button to record a new transaction."
-    elif "edit transaction" in question:
-        answer = "Click the 'Edit' button next to a transaction to modify it."
-    elif "delete transaction" in question:
-        answer = "Click the 'Delete' button next to a transaction to remove it."
-    elif "log out" in question:
-        answer = "Click the Log Out button in the navigation bar to sign out."
-    elif "create account" in question:
-        answer = "Click 'Create Account' on the home page to register."
-    elif "login" in question:
-        answer = "Click 'Log In' on the home page and enter your credentials."
-    else:
-        answer = "I'm sorry, I don't have an answer for that. Please refer to the help section for more details."
+    # Prompts the question
+    question = data.get("question", "")
+    answer = get_response(question)
+    #Takes the answer and posts onto the website
     return jsonify({"answer": answer})
 
 # --- Database Initialization ---
