@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceEase Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="logo">FinanceEase</div>
+        <nav class="nav-links">
+            <a href="#summary">Summary</a>
+            <a href="#transactions">Transactions</a>
+            <a href="#reports">Reports</a>
+            <form action="{{ url_for('logout') }}" method="get" class="logout-form">
+                <button type="submit">Log Out</button>
+            </form>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Summary Section -->
+        <section id="summary" class="summary-section">
+            <h1>Welcome Back, {{ user.first_name }}!</h1>
+            <div class="summary-cards">
+                <div class="card balance-card">
+                    <h2>Account Balance</h2>
+                    <form action="{{ url_for('update_balance') }}" method="POST">
+                        <input class="balance-input" type="text" name="balance" value="{{ user.balance }}">
+                        <button class="update-button" type="submit">Update</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h2>Total Income</h2>
+                    <p>
+                        ${{ "%.2f"|format(transactions | selectattr("transaction_type", "equalto", "income") | map(attribute="amount") | sum) }}
+                    </p>
+                </div>
+                <div class="card">
+                    <h2>Total Expenses</h2>
+                    <p>
+                        ${{ "%.2f"|format((transactions | selectattr("transaction_type", "equalto", "expense") | map(attribute="amount") | sum)|abs) }}
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transactions Section -->
+        <section id="transactions" class="transactions-section">
