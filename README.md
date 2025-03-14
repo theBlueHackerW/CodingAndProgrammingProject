@@ -7,7 +7,7 @@ FinanceEase is a personal finance management web application that allows users t
 - **User Authentication:** Secure user registration and login with a 4-digit security code.
 - **Account Management:** Users can update their account balance and track financial activity.
 - **Transaction Tracking:** Add, edit, and delete income and expense transactions with categorized labels.
-- **Financial Reports:** Generate visual reports, including line graphs, bar charts, and pie charts for income, expenses, and overall balance.
+- **Financial Reports:** Generate visual reports, including line graphs, bar charts, and pie charts for income, expenses, and overall balance. Receive customized AI-generated reports.
 - **Data Visualization:** Uses Plotly and Chart.js for interactive and insightful graphical representations.
 - **Search & Filtering:** Find transactions easily by searching through categories or descriptions.
 
